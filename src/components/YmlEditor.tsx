@@ -48,36 +48,134 @@ export const YmlEditor = () => {
     }
   }, [input, handleError]);
 
+  // Restored + improved auto-fix function
   const autoFixYaml = useCallback(() => {
     try {
-      let fixed = input
-        .replace(/\r\n?/g, "\n")
-        .replace(/\t/g, "  ")
+      let fixed = input ?? "";
+      fixed = fixed
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .replace(/\t/g, "  ");
+      fixed = fixed
         .split("\n")
         .map((l) => l.replace(/\s+$/, ""))
-        .join("\n")
+        .join("\n");
+      fixed = fixed
         .replace(/,(\s*\n)/g, "$1")
         .replace(/,(\s*(?:\]|\}))/g, "$1");
 
+      const rawLines = fixed.split("\n");
+      const lines = rawLines.map((raw, idx) => {
+        const indent = (raw.match(/^(\s*)/) || ["", ""])[1].length;
+        const trimmed = raw.trim();
+        const isList = /^-\s+/.test(trimmed);
+        const isKey = /:$/.test(trimmed);
+        return { raw, indent, trimmed, isList, isKey, idx };
+      });
+
+      const out: string[] = [];
+      const mappingStack: number[] = [];
+      let lastListIndent: number | null = null;
+      let lastListBlockStart = -1;
+
+      for (let i = 0; i < lines.length; i++) {
+        const { raw, indent, trimmed, isList, isKey } = lines[i];
+
+        if (!trimmed) {
+          out.push(raw);
+          continue;
+        }
+
+        while (
+          mappingStack.length &&
+          indent <= mappingStack[mappingStack.length - 1]
+        )
+          mappingStack.pop();
+
+        if (isKey) {
+          out.push(" ".repeat(indent) + trimmed);
+          mappingStack.push(indent);
+          lastListIndent = null;
+          lastListBlockStart = -1;
+          continue;
+        }
+
+        if (isList) {
+          if (mappingStack.length) {
+            const parentIndent = mappingStack[mappingStack.length - 1];
+            const target = parentIndent + 2;
+            out.push(" ".repeat(target) + trimmed);
+            lastListIndent = target;
+            lastListBlockStart = i;
+            continue;
+          }
+
+          if (lastListIndent !== null) {
+            out.push(" ".repeat(lastListIndent) + trimmed);
+            lastListBlockStart = i;
+            continue;
+          }
+
+          out.push(trimmed);
+          lastListIndent = 0;
+          lastListBlockStart = i;
+          continue;
+        }
+
+        out.push(" ".repeat(indent) + trimmed);
+        lastListIndent = null;
+        lastListBlockStart = -1;
+      }
+
+      fixed = out.join("\n");
+
       try {
-        const parsed = yaml.load(fixed);
-        const formatted = yaml.dump(parsed, { indent: 2, lineWidth: -1 });
+        const parsed = yaml.load(fixed) as unknown;
+        const formatted = yaml.dump(parsed as unknown, {
+          indent: 2,
+          lineWidth: -1,
+        });
         setInput(formatted);
         setOutput(formatted);
         setError("");
-        toast({ title: "Auto-fixed", description: "Tabs & indentation corrected" });
-      } catch (err) {
-        const e = err as any;
-        const msg = e?.mark
-          ? `${e.message} (line ${e.mark.line + 1}, col ${e.mark.column + 1})`
-          : e.message || "Unfixable YML syntax errors";
+        toast({
+          title: "Auto-fixed",
+          description: "Fixed tabs, indentation, and syntax errors",
+        });
+        return;
+      } catch (e) {
+        const err: unknown = e;
+        let msg =
+          "YML has syntax errors that cannot be automatically corrected";
+        if (err && typeof err === "object" && "message" in err) {
+          msg = (err as Error).message || msg;
+          type YamlErrorMark = { line: number; column: number };
+          type YamlError = Error & { mark?: YamlErrorMark };
+          const yamlErr = err as YamlError;
+          if (yamlErr.mark && typeof yamlErr.mark === "object") {
+            const m = yamlErr.mark;
+            msg += ` (line ${m.line + 1}, col ${m.column + 1})`;
+          }
+        }
+        setError(msg);
         setOutput(fixed);
-        handleError("Cannot auto-fix", msg);
+        toast({
+          title: "Cannot auto-fix",
+          description: msg,
+          variant: "destructive",
+        });
+        return;
       }
     } catch (err) {
-      handleError("Cannot auto-fix", (err as Error).message);
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
+      toast({
+        title: "Cannot auto-fix",
+        description: msg,
+        variant: "destructive",
+      });
     }
-  }, [input, handleError]);
+  }, [input]);
 
   const copyToClipboard = useCallback(() => {
     if (!output) return;
@@ -151,11 +249,11 @@ export const YmlEditor = () => {
               <div className="bg-card border border-border rounded-lg overflow-hidden relative">
                 <ScrollArea className="h-[500px] overflow-x-auto">
                   <Textarea
-                    value={input} // controlled
+                    value={input}
                     onChange={(e) => debouncedInput(e.target.value)}
                     placeholder="Paste your YML here..."
                     className="min-h-[500px] font-mono text-sm bg-transparent border-0 focus-visible:ring-0 resize-none"
-                    style={{ whiteSpace: "pre", overflowX: "auto" }} // <-- horizontal scroll enabled
+                    style={{ whiteSpace: "pre", overflowX: "auto" }}
                   />
                 </ScrollArea>
               </div>
@@ -201,8 +299,8 @@ export const YmlEditor = () => {
                         padding: "1rem",
                         background: "hsl(var(--card))",
                         fontSize: "0.875rem",
-                        whiteSpace: "pre",   // <-- keep long lines
-                        overflowX: "auto",   // <-- horizontal scroll
+                        whiteSpace: "pre",
+                        overflowX: "auto",
                       }}
                       showLineNumbers
                     >
