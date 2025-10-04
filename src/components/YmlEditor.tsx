@@ -8,7 +8,6 @@ import * as yaml from "js-yaml";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-// debounce util (browser-safe typing)
 const debounce = (fn: (...a: any[]) => void, delay = 300) => {
   let t: ReturnType<typeof setTimeout>;
   return (...args: any[]) => {
@@ -150,12 +149,13 @@ export const YmlEditor = () => {
             <div className="relative group">
               <div className="absolute -inset-0.5 bg-gradient-primary opacity-0 group-hover:opacity-20 blur transition-opacity rounded-lg will-change-opacity" />
               <div className="bg-card border border-border rounded-lg overflow-hidden relative">
-                <ScrollArea className="h-[500px]">
+                <ScrollArea className="h-[500px] overflow-x-auto">
                   <Textarea
                     value={input} // controlled
                     onChange={(e) => debouncedInput(e.target.value)}
                     placeholder="Paste your YML here..."
                     className="min-h-[500px] font-mono text-sm bg-transparent border-0 focus-visible:ring-0 resize-none"
+                    style={{ whiteSpace: "pre", overflowX: "auto" }} // <-- horizontal scroll enabled
                   />
                 </ScrollArea>
               </div>
@@ -192,7 +192,7 @@ export const YmlEditor = () => {
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-accent opacity-0 group-hover:opacity-20 blur transition-opacity rounded-lg will-change-opacity" />
                 <div className="bg-card border border-border rounded-lg overflow-hidden relative">
-                  <ScrollArea className="h-[500px]">
+                  <ScrollArea className="h-[500px] overflow-x-auto">
                     <SyntaxHighlighter
                       language="yaml"
                       style={vscDarkPlus}
@@ -201,6 +201,8 @@ export const YmlEditor = () => {
                         padding: "1rem",
                         background: "hsl(var(--card))",
                         fontSize: "0.875rem",
+                        whiteSpace: "pre",   // <-- keep long lines
+                        overflowX: "auto",   // <-- horizontal scroll
                       }}
                       showLineNumbers
                     >
