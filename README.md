@@ -1,7 +1,3 @@
-Your content is clear and well-organized. Below is a revised version with minor grammatical corrections, improved flow, and consistent formatting:
-
----
-
 # YAML Formatter Website
 
 A web-based tool that automatically fixes and formats YAML files for consistency and readability.
@@ -36,7 +32,3 @@ Visit the website and upload your YAML files to begin formatting—no installati
 ## License
 
 This project is licensed under the GNU General Public License (GPL). See the [LICENSE](./LICENSE) file for details.
-
----
-
-Let me know if you'd like this turned into a `README.md` file or adapted for a different format.
