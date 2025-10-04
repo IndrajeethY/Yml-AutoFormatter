@@ -8,9 +8,9 @@ import * as yaml from "js-yaml";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-// debounce util
+// debounce util (type safe)
 const debounce = (fn: (...a: any[]) => void, delay = 300) => {
-  let t: NodeJS.Timeout;
+  let t: ReturnType<typeof setTimeout>;
   return (...args: any[]) => {
     clearTimeout(t);
     t = setTimeout(() => fn(...args), delay);
@@ -142,7 +142,7 @@ export const YmlEditor = () => {
               <div className="bg-card border border-border rounded-lg overflow-hidden relative">
                 <ScrollArea className="h-[500px]">
                   <Textarea
-                    defaultValue={input}
+                    value={input} // controlled now
                     onChange={(e) => debouncedInput(e.target.value)}
                     placeholder="Paste your YML here..."
                     className="min-h-[500px] font-mono text-sm bg-transparent border-0 focus-visible:ring-0 resize-none"
@@ -208,7 +208,7 @@ export const YmlEditor = () => {
           </div>
         )}
 
-        {/* Features */}
+        {/* Feature cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
           <div className="relative group bg-card border border-border rounded-lg p-6 hover:border-primary transition-all overflow-hidden">
             <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity" />
