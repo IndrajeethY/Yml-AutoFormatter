@@ -8,7 +8,7 @@ import * as yaml from "js-yaml";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-// debounce util (type safe)
+// debounce util (browser-safe typing)
 const debounce = (fn: (...a: any[]) => void, delay = 300) => {
   let t: ReturnType<typeof setTimeout>;
   return (...args: any[]) => {
@@ -103,17 +103,17 @@ export const YmlEditor = () => {
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
         <header className="mb-8 text-center relative">
-          <div className="absolute inset-0 bg-gradient-primary opacity-10 blur-3xl -z-10" />
+          <div className="absolute inset-0 bg-gradient-primary opacity-10 blur-3xl -z-10 will-change-transform will-change-opacity" />
           <div className="flex items-center justify-center gap-3 mb-3">
             <div className="relative">
-              <FileCode className="w-10 h-10 text-primary animate-pulse" />
-              <div className="absolute inset-0 blur-md bg-primary/30" />
+              <FileCode className="w-10 h-10 text-primary animate-pulse will-change-transform" />
+              <div className="absolute inset-0 blur-md bg-primary/30 will-change-transform will-change-opacity" />
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent animate-fade-in">
+            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent animate-fade-in will-change-transform will-change-opacity">
               YML Formatter
             </h1>
           </div>
-          <p className="text-muted-foreground text-lg animate-fade-in">
+          <p className="text-muted-foreground text-lg animate-fade-in will-change-opacity">
             Clean, fast, and reliable YML formatting with auto-fix
           </p>
         </header>
@@ -127,22 +127,32 @@ export const YmlEditor = () => {
                 <Zap className="w-5 h-5" /> Input
               </h2>
               <div className="flex gap-2">
-                <Button onClick={checkYaml} variant="outline" size="sm" disabled={!input}
-                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all hover:shadow-glow-primary group">
+                <Button
+                  onClick={checkYaml}
+                  variant="outline"
+                  size="sm"
+                  disabled={!input}
+                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-[opacity,transform,box-shadow] duration-200 hover:shadow-glow-primary group will-change-transform will-change-opacity"
+                >
                   <CheckCircle2 className="w-4 h-4 mr-1 group-hover:scale-110 transition-transform" /> Check
                 </Button>
-                <Button onClick={autoFixYaml} variant="outline" size="sm" disabled={!input}
-                  className="border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-all hover:shadow-glow-accent group">
+                <Button
+                  onClick={autoFixYaml}
+                  variant="outline"
+                  size="sm"
+                  disabled={!input}
+                  className="border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-[opacity,transform,box-shadow] duration-200 hover:shadow-glow-accent group will-change-transform will-change-opacity"
+                >
                   <Sparkles className="w-4 h-4 mr-1 group-hover:rotate-12 transition-transform" /> Auto-fix
                 </Button>
               </div>
             </div>
             <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-primary opacity-0 group-hover:opacity-20 blur transition-opacity rounded-lg" />
+              <div className="absolute -inset-0.5 bg-gradient-primary opacity-0 group-hover:opacity-20 blur transition-opacity rounded-lg will-change-opacity" />
               <div className="bg-card border border-border rounded-lg overflow-hidden relative">
                 <ScrollArea className="h-[500px]">
                   <Textarea
-                    value={input} // controlled now
+                    value={input} // controlled
                     onChange={(e) => debouncedInput(e.target.value)}
                     placeholder="Paste your YML here..."
                     className="min-h-[500px] font-mono text-sm bg-transparent border-0 focus-visible:ring-0 resize-none"
@@ -159,19 +169,28 @@ export const YmlEditor = () => {
                 <FileCode className="w-5 h-5" /> Output
               </h2>
               <div className="flex gap-2">
-                <Button onClick={formatYaml} size="sm" disabled={!input}
-                  className="bg-gradient-primary hover:shadow-glow-primary transition-all group">
+                <Button
+                  onClick={formatYaml}
+                  size="sm"
+                  disabled={!input}
+                  className="bg-gradient-primary hover:shadow-glow-primary transition-[opacity,transform,box-shadow] duration-200 group will-change-transform will-change-opacity"
+                >
                   <Sparkles className="w-4 h-4 mr-1 group-hover:scale-110 transition-transform" /> Format
                 </Button>
-                <Button onClick={copyToClipboard} variant="outline" size="sm" disabled={!output}
-                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all hover:shadow-glow-primary group">
+                <Button
+                  onClick={copyToClipboard}
+                  variant="outline"
+                  size="sm"
+                  disabled={!output}
+                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-[opacity,transform,box-shadow] duration-200 hover:shadow-glow-primary group will-change-transform will-change-opacity"
+                >
                   <Copy className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 </Button>
               </div>
             </div>
             {output ? (
               <div className="relative group">
-                <div className="absolute -inset-0.5 bg-gradient-accent opacity-0 group-hover:opacity-20 blur transition-opacity rounded-lg" />
+                <div className="absolute -inset-0.5 bg-gradient-accent opacity-0 group-hover:opacity-20 blur transition-opacity rounded-lg will-change-opacity" />
                 <div className="bg-card border border-border rounded-lg overflow-hidden relative">
                   <ScrollArea className="h-[500px]">
                     <SyntaxHighlighter
@@ -202,7 +221,7 @@ export const YmlEditor = () => {
 
         {/* Error */}
         {error && (
-          <div className="bg-destructive/10 border border-destructive text-destructive rounded-lg p-4 mb-6 animate-fade-in">
+          <div className="bg-destructive/10 border border-destructive text-destructive rounded-lg p-4 mb-6 animate-fade-in will-change-opacity">
             <h3 className="font-semibold mb-1">Error</h3>
             <p className="text-sm font-mono">{error}</p>
           </div>
@@ -210,22 +229,22 @@ export const YmlEditor = () => {
 
         {/* Feature cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-          <div className="relative group bg-card border border-border rounded-lg p-6 hover:border-primary transition-all overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity" />
+          <div className="relative group bg-card border border-border rounded-lg p-6 hover:border-primary transition-[opacity,transform,border-color] duration-200 overflow-hidden will-change-transform will-change-opacity">
+            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity will-change-opacity" />
             <h3 className="text-lg font-semibold mb-2 text-primary relative z-10">Format</h3>
             <p className="text-sm text-muted-foreground relative z-10">
               Clean and properly indent your YML files with a single click
             </p>
           </div>
-          <div className="relative group bg-card border border-border rounded-lg p-6 hover:border-accent transition-all overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-accent opacity-0 group-hover:opacity-10 transition-opacity" />
+          <div className="relative group bg-card border border-border rounded-lg p-6 hover:border-accent transition-[opacity,transform,border-color] duration-200 overflow-hidden will-change-transform will-change-opacity">
+            <div className="absolute inset-0 bg-gradient-accent opacity-0 group-hover:opacity-10 transition-opacity will-change-opacity" />
             <h3 className="text-lg font-semibold mb-2 text-accent relative z-10">Auto-fix</h3>
             <p className="text-sm text-muted-foreground relative z-10">
               Automatically correct indentation, quotes, and common syntax errors
             </p>
           </div>
-          <div className="relative group bg-card border border-border rounded-lg p-6 hover:border-primary transition-all overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity" />
+          <div className="relative group bg-card border border-border rounded-lg p-6 hover:border-primary transition-[opacity,transform,border-color] duration-200 overflow-hidden will-change-transform will-change-opacity">
+            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity will-change-opacity" />
             <h3 className="text-lg font-semibold mb-2 text-primary relative z-10">Syntax Highlight</h3>
             <p className="text-sm text-muted-foreground relative z-10">
               View formatted output with beautiful syntax highlighting
